@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Casos de uso. Depende só do Domínio e de abstrações (interfaces de repositório),
+    por isso pode ser testada sem banco de dados.
+  -->
+  <PropertyGroup>
+    <RootNamespace>MoveSync.Application</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MoveSync.Domain\MoveSync.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="MoveSync.UnitTests" />
+  </ItemGroup>
+</Project>

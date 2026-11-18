@@ -1,0 +1,15 @@
+<Project>
+  <!--
+    Configurações comuns a TODOS os projetos da solução.
+    Para trocar a versão do .NET (ex.: net8.0), altere apenas TargetFramework aqui
+    e as versões dos pacotes em Directory.Packages.props.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <!-- Avisos de auditoria de pacotes (vulnerabilidades) aparecem no build -->
+    <NuGetAudit>true</NuGetAudit>
+  </PropertyGroup>
+</Project>

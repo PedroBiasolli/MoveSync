@@ -1,0 +1,120 @@
+# =====================================================================
+# MoveSync API — roteiro de testes manuais (Visual Studio / VS Code REST Client / Rider)
+# Execute de cima para baixo. As variáveis capturam tokens e IDs automaticamente.
+# Senhas abaixo = valores do appsettings.Development.json (somente ambiente local).
+# =====================================================================
+
+@api = http://localhost:5080
+
+### 1) Saúde da API (banco, sensores IoT, serviço externo)
+GET {{api}}/health
+
+### 2) Login do gestor
+# @name loginGestor
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "gestor@movesync.dev", "senha": "Gestor@2026" }
+
+### 3) Login da cidadã
+# @name loginCidada
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "cidada@movesync.dev", "senha": "Cidada@2026" }
+
+### 4) Lista pública de cruzamentos (sem login)
+# @name lista
+GET {{api}}/api/cruzamentos?pagina=1&tamanhoPagina=10
+
+@cruzamentoId = {{lista.response.body.$.itens[0].id}}
+@viaId = {{lista.response.body.$.itens[0].vias[0].id}}
+
+### 5) Status do cruzamento para o cidadão (sem login)
+GET {{api}}/api/cruzamentos/{{cruzamentoId}}/status
+
+### 6) Token de um sensor IoT (ESP32 simulado)
+# @name tokenSensor
+POST {{api}}/api/auth/sensores/token
+Content-Type: application/json
+
+{ "codigo": "SPO002-V1", "segredo": "sensor-demo-local-2026" }
+
+### 7) Sensor envia uma leitura (rode 2x: 201 e depois 200 com Idempotency-Replayed: true)
+POST {{api}}/api/telemetria/leituras
+Authorization: Bearer {{tokenSensor.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "leituraId": "demo-leitura-0001", "coletadaEm": "{{$datetime iso8601}}", "veiculosContados": 42, "tamanhoFila": 9 }
+
+### 8) Gestor força o recálculo do plano
+POST {{api}}/api/cruzamentos/{{cruzamentoId}}/planos/recalcular
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 9) Indicadores de impacto (tempo fixo × adaptativo)
+GET {{api}}/api/cruzamentos/{{cruzamentoId}}/indicadores
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 10) Cidadã registra ocorrência (repita com a MESMA chave: mesma resposta, sem duplicar)
+# @name ocorrencia
+POST {{api}}/api/ocorrencias
+Authorization: Bearer {{loginCidada.response.body.$.accessToken}}
+Idempotency-Key: 6f1c2a9e-0b7d-4a51-9a2e-ocorrencia-demo-01
+Content-Type: application/json
+
+{ "cruzamentoId": "{{cruzamentoId}}", "tipo": "SemaforoApagado", "descricao": "Semáforo apagado no sentido Pinheiros desde as 7h." }
+
+### 11) Minhas ocorrências
+GET {{api}}/api/ocorrencias/minhas
+Authorization: Bearer {{loginCidada.response.body.$.accessToken}}
+
+### 12) Gestor coloca em análise
+PATCH {{api}}/api/ocorrencias/{{ocorrencia.response.body.$.id}}/status
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "status": "EmAnalise" }
+
+### 13) Travessia acessível (botoeira virtual)
+POST {{api}}/api/cruzamentos/{{cruzamentoId}}/travessia-acessivel
+Authorization: Bearer {{loginCidada.response.body.$.accessToken}}
+Idempotency-Key: {{$guid}}
+Content-Type: application/json
+
+{ "motivo": "MobilidadeReduzida" }
+
+### 14) Corredor de emergência
+# @name emergencia
+POST {{api}}/api/cruzamentos/{{cruzamentoId}}/emergencias
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+Idempotency-Key: {{$guid}}
+Content-Type: application/json
+
+{ "viaId": "{{viaId}}", "tipoVeiculo": "Ambulancia", "duracaoSegundos": 120 }
+
+### 15) Encerrar emergência
+POST {{api}}/api/emergencias/{{emergencia.response.body.$.id}}/encerrar
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 16) Painel do gestor
+GET {{api}}/api/painel/resumo
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 17) Cidadã tentando acessar o painel → 403
+GET {{api}}/api/painel/resumo
+Authorization: Bearer {{loginCidada.response.body.$.accessToken}}
+
+### 18) Relatório de impacto e benefício/custo para a prefeitura
+GET {{api}}/api/painel/impacto
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 19) Simulação de cenário: 6 h/dia de referência e piloto gratuito
+GET {{api}}/api/painel/impacto?horasReferenciaPorDia=6&assinaturaMensalPorCruzamentoReais=0
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 20) Parâmetro fora da faixa → 400
+GET {{api}}/api/painel/impacto?horasReferenciaPorDia=25
+Authorization: Bearer {{loginGestor.response.body.$.accessToken}}
+
+### 21) Health check completo (API, banco, sensores, núcleo Java)
+GET {{api}}/health

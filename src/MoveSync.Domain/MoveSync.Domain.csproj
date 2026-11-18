@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Domínio puro: nenhuma dependência externa. Regras de negócio e motor de cálculo semafórico. -->
+  <PropertyGroup>
+    <RootNamespace>MoveSync.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,29 @@
+# Build
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Testes e cobertura
+TestResults/
+coverage*/
+*.coverage
+
+# Banco SQLite local
+*.db
+*.db-shm
+*.db-wal
+
+# Segredos — NUNCA versionar
+.env
+appsettings.*.local.json
+secrets.json
+movesync-api.zip
