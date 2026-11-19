@@ -1,6 +1,6 @@
 GLOBAL SOLUTION 2026/2 - CITIZENTECH
 Projeto: MoveSync
-Grupo: ______________________
+Grupo: MoveSync
 
 Integrantes (RM - Nome completo - Turma):
 RM562521 - Pedro Pereira Biasolli da Fonseca - 2TDSPO

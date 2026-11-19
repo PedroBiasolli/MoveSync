@@ -380,6 +380,7 @@ def gerar_modelo_pdf(pasta_prints=None, nome_arquivo="Modelo-PDF-Plano-de-Projet
     texto("MoveSync", 30, True, azul, centro=True, antes=12)
     texto("Plano de Projeto Scrum e Plano de Testes no Azure DevOps", 13, centro=True)
     texto("Compliance, Quality Assurance & Tests · 2TDSPO", 10, cor=cinza_texto, centro=True, depois=24)
+    texto("Grupo: MoveSync", 10, True, centro=True, depois=6)
     membros = doc.add_table(rows=6, cols=3)
     membros.style = "Table Grid"
     for i, (nome, rm, turma) in enumerate([("Nome completo", "RM", "Turma"),
@@ -428,10 +429,11 @@ def gerar_modelo_pdf(pasta_prints=None, nome_arquivo="Modelo-PDF-Plano-de-Projet
                         (f"{ct['id']} · Passos", f"{ct['id']}-passos")]
     grade(rotulos, 5.2)
 
-    # 3. Execução (apoio à apresentação)
-    titulo("3. Execução e relatórios")
-    grade([("Test Plans > Execute (resultados por caso)", "execucao"),
-           ("Progress report / gráfico de resultados", "relatorio")], 6.5, colunas=1)
+    # 3. Execução (apoio à apresentação). No documento final só entra se houver prints de execuções reais.
+    if not pasta_prints or any(os.path.exists(os.path.join(pasta_prints, f"{n}.jpg")) for n in ("execucao", "relatorio")):
+        titulo("3. Execução e relatórios")
+        grade([("Test Plans > Execute (resultados por caso)", "execucao"),
+               ("Progress report / gráfico de resultados", "relatorio")], 6.5, colunas=1)
 
     caminho = os.path.join(RAIZ, nome_arquivo)
     doc.save(caminho)

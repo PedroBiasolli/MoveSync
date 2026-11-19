@@ -47,10 +47,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--prints", required=True, help="pasta com os .jpg gerados pela captura")
     ap.add_argument("--sem-pdf", action="store_true")
+    ap.add_argument("--sem-execucao", action="store_true",
+                    help="omite a seção 3 (use enquanto nenhum teste foi executado no Test Plans)")
     args = ap.parse_args()
 
     pasta = tempfile.mkdtemp(prefix="prints-")
     for nome in os.listdir(args.prints):
+        if args.sem_execucao and nome in ("execucao.jpg", "relatorio.jpg"):
+            continue
         if nome.lower().endswith(".jpg"):
             shutil.copy(os.path.join(args.prints, nome), pasta)
     for alto, base in (("backlog.jpg", "backlog"), ("consulta-tested-by.jpg", "consulta")):
