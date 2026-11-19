@@ -50,7 +50,15 @@ Tudo o que a disciplina pede, pronto para colocar no **Azure DevOps**: backlog S
 
 Cria backlog, Test Plan, 12 suítes, 40 casos com **Sumário completo** e os vínculos *Tested By* — exatamente o que os prints exigem.
 
-1. Crie um **Personal Access Token**: ícone do usuário → *Personal access tokens* → *New Token* → escopos **Work Items (Read & write)** e **Test Management (Read & write)** → copie o token.
+> **Como foi feito no projeto da equipe (sem PAT):** no **Azure Cloud Shell** (portal.azure.com → ícone `>_`), logado com a conta FIAP:
+> ```bash
+> git clone https://github.com/PedroBiasolli/MoveSync.git && cd MoveSync
+> export AZURE_DEVOPS_PAT=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv)
+> python3 qa/fonte/azure_devops_importar.py --org https://dev.azure.com/movesync-2tdspo --projeto MoveSync --url-api https://movesync-api-2tdspo.azurewebsites.net
+> ```
+> O script reconhece o token do Microsoft Entra (começa com `eyJ`) e usa autenticação *Bearer*; nenhum token fica salvo.
+
+1. (Alternativa com PAT) Crie um **Personal Access Token**: ícone do usuário → *Personal access tokens* → *New Token* → escopos **Work Items (Read & write)** e **Test Management (Read & write)** → copie o token.
 2. No terminal, na raiz do repositório:
    ```bash
    pip install requests

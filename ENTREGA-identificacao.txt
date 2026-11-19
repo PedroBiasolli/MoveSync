@@ -3,16 +3,16 @@ Projeto: MoveSync
 Grupo: ______________________
 
 Integrantes (RM - Nome completo - Turma):
-RM562521 - Pedro Fonseca - 2TDSPO
-RM562532 - Matheus Enrico - 2TDSPO
-RM563736 - Bruno Zanateli - 2TDSPO
+RM562521 - Pedro Pereira Biasolli da Fonseca - 2TDSPO
+RM562532 - Matheus Enrico de Souza - 2TDSPO
+RM563736 - Bruno Andrade Zanateli - 2TDSPO
 RM562975 - Rodrigo Tiezzi - 2TDSPO
-RM566098 - Christian Souza - 2TDSPO
+RM566098 - Christian de Sousa Freitas - 2TDSPO
 
 Advanced Business Development with .NET
 - Repositório GitHub: https://github.com/PedroBiasolli/MoveSync
-- API publicada (Swagger): https://______.azurewebsites.net/swagger
+- API publicada (Swagger): https://movesync-api-2tdspo.azurewebsites.net/swagger
 
 Compliance, Quality Assurance & Tests
-- Projeto no Azure Boards: https://dev.azure.com/______/MoveSync/_boards
+- Projeto no Azure Boards: https://dev.azure.com/movesync-2tdspo/MoveSync/_boards
 - Professor convidado como Project Administrator: sim

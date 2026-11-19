@@ -8,8 +8,9 @@ Semáforos inteligentes de **baixo custo** para cidades pequenas e médias: sens
 | | |
 |---|---|
 | **Repositório** | https://github.com/PedroBiasolli/MoveSync |
-| **Swagger (nuvem)** | `https://<sua-api>.azurewebsites.net/swagger` *(preencher após o deploy)* |
+| **Swagger (nuvem)** | https://movesync-api-2tdspo.azurewebsites.net/swagger |
 | **Swagger (local)** | http://localhost:5080/swagger |
+| **Azure DevOps (QA)** | https://dev.azure.com/movesync-2tdspo/MoveSync |
 | **Stack** | .NET 10 (LTS) · ASP.NET Core Minimal API · EF Core 10 · Oracle 19c / SQLite · JWT · xUnit |
 
 ---

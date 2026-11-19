@@ -8,7 +8,10 @@ Cria no Azure DevOps (processo Scrum), via API REST, TODO o conteúdo de QA da M
 
 Pré-requisitos:
   • Projeto criado no Azure DevOps com o processo SCRUM.
-  • Personal Access Token (PAT) com escopos: Work Items (Read & Write) e Test Management (Read & Write).
+  • Personal Access Token (PAT) com escopos: Work Items (Read & Write) e Test Management (Read & Write),
+    OU um token do Microsoft Entra (sem criar PAT), por exemplo no Azure Cloud Shell:
+      export AZURE_DEVOPS_PAT=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv)
+  • Licença "Basic + Test Plans" (ou o teste gratuito de 30 dias) para quem roda o script: criar Test Plan exige.
   • pip install requests
 
 Uso:
@@ -44,8 +47,11 @@ class AzureDevOps:
         if not simular:
             import requests  # importado aqui para --simular funcionar sem a biblioteca
             self.http = requests.Session()
-            token = base64.b64encode(f":{pat}".encode()).decode()
-            self.http.headers["Authorization"] = f"Basic {token}"
+            if pat.startswith("eyJ"):  # token do Microsoft Entra (az account get-access-token): dispensa PAT
+                self.http.headers["Authorization"] = f"Bearer {pat}"
+            else:
+                token = base64.b64encode(f":{pat}".encode()).decode()
+                self.http.headers["Authorization"] = f"Basic {token}"
 
     def _url(self, caminho):
         return f"{self.org}/{self.projeto}/_apis/{caminho}"
@@ -114,7 +120,7 @@ def main():
     parser = argparse.ArgumentParser(description="Importa backlog e plano de testes da MoveSync no Azure DevOps")
     parser.add_argument("--org", required=True, help="Ex.: https://dev.azure.com/minha-org")
     parser.add_argument("--projeto", required=True)
-    parser.add_argument("--pat", default=os.environ.get("AZURE_DEVOPS_PAT", ""), help="PAT (ou variável AZURE_DEVOPS_PAT)")
+    parser.add_argument("--pat", default=os.environ.get("AZURE_DEVOPS_PAT", ""), help="PAT ou token do Entra (ou variável AZURE_DEVOPS_PAT)")
     parser.add_argument("--simular", action="store_true")
     parser.add_argument("--url-api", default=os.environ.get("MOVESYNC_URL_API", ""),
                         help="URL da API publicada; substitui [URL da API] nos passos dos casos de teste")
