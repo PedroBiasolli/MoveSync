@@ -298,7 +298,9 @@ def gerar_markdown():
 # ---------------------------------------------------------------------------
 # 5) Modelo compacto do PDF de entrega (Word) — 2 prints por linha
 # ---------------------------------------------------------------------------
-def gerar_modelo_pdf():
+def gerar_modelo_pdf(pasta_prints=None, nome_arquivo="Modelo-PDF-Plano-de-Projeto-e-Testes.docx"):
+    """Sem pasta_prints: modelo com espaços "[ print ]". Com pasta_prints: encaixa cada print
+    (gerado por capturar_prints_azure.py) no seu espaço e salva o documento final."""
     from docx import Document
     from docx.enum.table import WD_ROW_HEIGHT_RULE, WD_TABLE_ALIGNMENT
     from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
@@ -337,26 +339,37 @@ def gerar_modelo_pdf():
         sombra.set(qn("w:fill"), "F2F5F9")
         tc_pr.append(sombra)
 
-    def grade(rotulos, altura_cm=5.6, colunas=2):
-        """Tabela de espaços para prints: cada célula = legenda + área cinza."""
-        linhas = (len(rotulos) + colunas - 1) // colunas
-        tabela = doc.add_table(rows=linhas * 2, cols=colunas)
+    def grade(itens, altura_cm=5.6, colunas=2):
+        """Tabela de prints: cada célula = legenda + print (ou área cinza "[ print ]" no modelo).
+        itens: lista de (legenda, nome_do_arquivo_sem_extensao). Legenda e print ficam na mesma
+        célula e a linha não quebra entre páginas."""
+        largura_cm = 18.0 / colunas - 0.3
+        linhas = (len(itens) + colunas - 1) // colunas
+        tabela = doc.add_table(rows=linhas, cols=colunas)
         tabela.style = "Table Grid"
         tabela.alignment = WD_TABLE_ALIGNMENT.CENTER
-        for i, rotulo in enumerate(rotulos):
+        for linha in tabela.rows:
+            tr_pr = linha._tr.get_or_add_trPr()
+            nao_quebrar = OxmlElement("w:cantSplit")
+            tr_pr.append(nao_quebrar)
+        for i, (rotulo, arquivo) in enumerate(itens):
             linha, coluna = divmod(i, colunas)
-            legenda = tabela.cell(linha * 2, coluna).paragraphs[0]
+            celula = tabela.cell(linha, coluna)
+            legenda = celula.paragraphs[0]
+            legenda.paragraph_format.keep_with_next = True
             run = legenda.add_run(rotulo)
             run.font.size, run.font.bold = Pt(7.5), True
-            area = tabela.cell(linha * 2 + 1, coluna)
-            sombrear(area)
-            par = area.paragraphs[0]
+            par = celula.add_paragraph()
             par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            marca = par.add_run("[ print ]")
-            marca.font.size, marca.font.color.rgb = Pt(8), cinza_texto
-        for linha in range(linhas):
-            tabela.rows[linha * 2 + 1].height = Cm(altura_cm)
-            tabela.rows[linha * 2 + 1].height_rule = WD_ROW_HEIGHT_RULE.AT_LEAST
+            imagem = os.path.join(pasta_prints, f"{arquivo}.jpg") if pasta_prints and arquivo else None
+            if imagem and os.path.exists(imagem):
+                par.add_run().add_picture(imagem, width=Cm(largura_cm))
+            else:
+                sombrear(celula)
+                par.paragraph_format.space_before = Cm(altura_cm / 2 - 0.3)
+                par.paragraph_format.space_after = Cm(altura_cm / 2 - 0.3)
+                marca = par.add_run("[ print ]")
+                marca.font.size, marca.font.color.rgb = Pt(8), cinza_texto
         doc.add_paragraph().paragraph_format.space_after = Pt(2)
 
     def quebra():
@@ -370,16 +383,16 @@ def gerar_modelo_pdf():
     membros = doc.add_table(rows=6, cols=3)
     membros.style = "Table Grid"
     for i, (nome, rm, turma) in enumerate([("Nome completo", "RM", "Turma"),
-                                           ("Pedro Fonseca", "RM562521", "2TDSPO"),
-                                           ("Matheus Enrico", "RM562532", "2TDSPO"),
-                                           ("Bruno Zanateli", "RM563736", "2TDSPO"),
+                                           ("Pedro Pereira Biasolli da Fonseca", "RM562521", "2TDSPO"),
+                                           ("Matheus Enrico de Souza", "RM562532", "2TDSPO"),
+                                           ("Bruno Andrade Zanateli", "RM563736", "2TDSPO"),
                                            ("Rodrigo Tiezzi", "RM562975", "2TDSPO"),
-                                           ("Christian Souza", "RM566098", "2TDSPO")]):
+                                           ("Christian de Sousa Freitas", "RM566098", "2TDSPO")]):
         for j, valor in enumerate((nome, rm, turma)):
             run = membros.cell(i, j).paragraphs[0].add_run(valor)
             run.font.bold = i == 0
     texto("", depois=8)
-    texto("Link do projeto no Azure Boards: https://dev.azure.com/______/MoveSync/_boards", 9, True)
+    texto("Link do projeto no Azure Boards: https://dev.azure.com/movesync-2tdspo/MoveSync/_boards", 9, True)
     texto("Professor convidado como Project Administrator: sim", 9)
     total_ct = sum(len(f["testes"]) for _, f in features())
     total_pbi = sum(len(f["pbis"]) for _, f in features())
@@ -390,32 +403,37 @@ def gerar_modelo_pdf():
     # 1. Plano de projeto
     titulo("1. Plano de Projeto Scrum")
     texto("Epics → Features → Product Backlog Items. PBIs como histórias de usuário; critérios de aceite em Dado / Quando / Então.")
-    grade(["1.1 Boards > Backlogs (nível Epics, hierarquia expandida)", "1.1 Backlogs (continuação, se necessário)"], 7.5)
+    grade([("1.1 Boards > Backlogs (nível Epics, hierarquia expandida)", "backlog-1"),
+           ("1.1 Backlogs (continuação)", "backlog-2")], 7.5, colunas=1)
     titulo("1.2 Descrição e critérios de aceite — Features e PBIs")
     rotulos = []
     for _, feature in features():
-        rotulos.append(f"{feature['titulo']} (Feature)")
-        rotulos += [f"{pbi['id']} - {pbi['titulo']} (PBI)" for pbi in feature["pbis"]]
+        rotulos.append((f"{feature['titulo']} (Feature)", feature["id"]))
+        rotulos += [(f"{pbi['id']} - {pbi['titulo']} (PBI)", pbi["id"]) for pbi in feature["pbis"]]
     grade(rotulos)
 
     # 2. Plano de testes
     quebra()
     titulo("2. Plano de Testes")
     texto("Casos funcionais de sistema, caixa-preta, positivos e negativos; uma suíte por Feature e vínculo Tested By com a Feature.")
-    grade(["2.1 Boards: Test Cases por Feature (consulta Tested By)", "2.1 Continuação da consulta",
-           "2.2 Test Plans: plano com as suítes F01–F12", "2.2 Detalhe de uma suíte"], 6.5)
+    grade([("2.1 Boards: Test Cases por Feature (consulta Tested By)", "consulta-1"),
+           ("2.1 Continuação da consulta", "consulta-2"),
+           ("2.2 Test Plans: plano com as suítes F01–F12", "plano-suites"),
+           ("2.2 Detalhe de uma suíte (F01)", "suite-F01")], 6.5, colunas=1)
     titulo("2.3 Sumário e Passos de cada caso de teste")
     rotulos = []
     for _, feature in features():
         for ct in feature["testes"]:
-            rotulos += [f"{ct['id']} [{ct['tipo']}] · Sumário", f"{ct['id']} · Passos"]
+            rotulos += [(f"{ct['id']} [{ct['tipo']}] · Sumário", f"{ct['id']}-sumario"),
+                        (f"{ct['id']} · Passos", f"{ct['id']}-passos")]
     grade(rotulos, 5.2)
 
     # 3. Execução (apoio à apresentação)
     titulo("3. Execução e relatórios")
-    grade(["Test Plans > Execute (resultados por caso)", "Progress report / gráfico de resultados"], 6.5)
+    grade([("Test Plans > Execute (resultados por caso)", "execucao"),
+           ("Progress report / gráfico de resultados", "relatorio")], 6.5, colunas=1)
 
-    caminho = os.path.join(RAIZ, "Modelo-PDF-Plano-de-Projeto-e-Testes.docx")
+    caminho = os.path.join(RAIZ, nome_arquivo)
     doc.save(caminho)
     return caminho
 

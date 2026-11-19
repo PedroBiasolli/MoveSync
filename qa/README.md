@@ -119,6 +119,14 @@ Abra `Modelo-PDF-Plano-de-Projeto-e-Testes.docx`: cada espaço cinza diz qual pr
 
 Cada linha do modelo tem 2 prints lado a lado (ex.: Sumário | Passos do mesmo caso). Depois: *Arquivo → Salvar como → PDF*. Dica: use *Win + Shift + S* para recortes rápidos e cole direto no Word.
 
+**Como a equipe fez (automático):** uma ferramenta .NET com Playwright abre o Microsoft Edge, você faz login uma vez e ela salva cada tela em alta resolução com o nome que o montador espera (`backlog.jpg`, `F01.jpg`, `PBI-01.jpg`, `CT-F01-01-sumario.jpg`, `CT-F01-01-passos.jpg`, `plano-suites.jpg`, `execucao.jpg`, `relatorio.jpg`...). Depois:
+
+```bash
+python qa/fonte/montar_pdf_qa.py --prints <pasta-dos-prints>
+```
+
+O script divide as telas altas (backlog e consulta) em duas partes legíveis, encaixa cada print na célula certa do modelo e gera `qa/Plano-de-Projeto-e-Testes-MoveSync.docx` e `.pdf`.
+
 **Entrega (formato do PDF da GS):** um `.zip` com o **PDF** + um **.txt** com RM, nome completo e turma de cada integrante. E convide o professor:
 - *Organization settings → Users → Add users* → e-mail do professor → Access level **Basic** (ou Basic + Test Plans).
 - *Project settings → Permissions → Project Administrators → Members → Add* → professor.
