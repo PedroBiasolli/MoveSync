@@ -90,7 +90,7 @@ Conferência item a item com o PDF da Global Solution 2026/2. **Legenda:** ✅ p
 | 02 | Perguntas sobre a estrutura do projeto (20) | Por que 5 Epics; como Feature e PBI se dividem |
 | 03 | Perguntas sobre descrições e critérios (20) | Ler em voz alta um critério BDD e o caso que o comprova |
 | 04 | **Executar os testes manuais no Test Plans** (20) | Casos sugeridos no `qa/README.md` (ex.: CT-F11-04, impacto para a prefeitura); **a API precisa estar no ar** |
-| 05 | **Relatórios analíticos de testes** (20) | Depois de executar, abrir **Test Plans → Progress report** e **Runs**; marcar ao menos um caso como *Failed* com bug vinculado para o relatório não ficar todo verde |
+| 05 | **Relatórios analíticos de testes** (20) | Depois de executar, abrir **Test Plans → Progress report** e **Runs**; registrar o resultado real de cada caso (se algum falhar de verdade, marcar *Failed* e vincular um bug) |
 
 ---
 
